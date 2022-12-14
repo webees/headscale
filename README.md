@@ -3,10 +3,11 @@
 apt update
 apt install -y \
     curl \
-    net-tools \
-    docker-compose-plugin
+    net-tools
 
 curl -sSL https://get.docker.com/ | sh
+
+apt install -y docker-compose-plugin
 ```
 
 # headscale
