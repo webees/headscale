@@ -18,44 +18,42 @@ cd /app/headscale
 ```
 
 ```
-cat << EOF > /app/headscale/Caddyfile
-{
-  skip_install_trust
-  auto_https disable_redirects
-  http_port {\$HTTP_PORT}
-  https_port {\$HTTPS_PORT}
-}
-
-:{\$HTTP_PORT} {
-  handle_path /web* {
-    file_server {
-      root /web
-    }
-  }
-  reverse_proxy * http://headscale:8080
-}
-EOF
-```
-
-```
 cat << EOF > /app/headscale/compose.yaml
-version: '3.5'
+version: '3.8'
+
 services:
   headscale:
     container_name: headscale
-    image: headscale/headscale:latest-alpine
+    image: headscale/headscale:latest
     restart: unless-stopped
+    networks:
+      - traefik
     volumes:
-      - /app/headscale:/etc/headscale
+      - ./:/etc/headscale
     command: headscale serve
-  headscale-ui:
-    container_name: headscale-ui
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.headscale.entrypoints=https
+      - traefik.http.routers.headscale.tls=true
+      - traefik.http.routers.headscale.rule=Host(`p2p.dev.run`)
+      - traefik.http.services.headscale.loadbalancer.server.port=8080
+  headscale_ui:
+    container_name: headscale_ui
     image: ghcr.io/gurucomputing/headscale-ui:latest
     restart: unless-stopped
-    volumes:
-      - /app/headscale/Caddyfile:/data/Caddyfile
-    ports:
-      - 8888:80
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.headscale_ui.entrypoints=https
+      - traefik.http.routers.headscale_ui.tls=true
+      - traefik.http.routers.headscale_ui.middlewares=default
+      - traefik.http.routers.headscale_ui.rule=Host(`p2p.dev.run`) && PathPrefix(`/web`)
+      - traefik.http.services.headscale_ui.loadbalancer.server.port=80
+
+networks:
+  traefik:
+    external: true
 EOF
 ```
 
