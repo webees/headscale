@@ -19,15 +19,13 @@ cd /app/headscale
 
 ```
 cat << EOF > /app/headscale/compose.yaml
-version: '3.8'
+version: '3'
 
 services:
   headscale:
     container_name: headscale
-    image: headscale/headscale:latest
     restart: unless-stopped
-    networks:
-      - traefik
+    image: headscale/headscale:latest
     volumes:
       - ./:/etc/headscale
     command: headscale serve
@@ -37,12 +35,13 @@ services:
       - traefik.http.routers.headscale.tls=true
       - traefik.http.routers.headscale.rule=Host(`p2p.dev.run`)
       - traefik.http.services.headscale.loadbalancer.server.port=8080
-  headscale_ui:
-    container_name: headscale_ui
-    image: ghcr.io/gurucomputing/headscale-ui:latest
-    restart: unless-stopped
     networks:
       - traefik
+      
+  headscale_ui:
+    container_name: headscale_ui
+    restart: unless-stopped
+    image: ghcr.io/gurucomputing/headscale-ui:latest
     labels:
       - traefik.enable=true
       - traefik.http.routers.headscale_ui.entrypoints=https
@@ -50,6 +49,8 @@ services:
       - traefik.http.routers.headscale_ui.middlewares=default
       - traefik.http.routers.headscale_ui.rule=Host(`p2p.dev.run`) && PathPrefix(`/web`)
       - traefik.http.services.headscale_ui.loadbalancer.server.port=80
+    networks:
+      - traefik
 
 networks:
   traefik:
