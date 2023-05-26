@@ -1,5 +1,5 @@
 # docker
-```
+```shell
 apt update
 apt install -y \
     curl \
@@ -11,13 +11,13 @@ apt install -y docker-compose-plugin
 ```
 
 # headscale
-```
+```shell
 mkdir -p /app/headscale
 
 cd /app/headscale
 ```
 
-```
+```yml
 cat << EOF > /app/headscale/compose.yaml
 version: '3'
 
@@ -58,13 +58,13 @@ networks:
 EOF
 ```
 
-```
+```shell
 curl https://raw.githubusercontent.com/juanfont/headscale/main/config-example.yaml -o /app/headscale/config.yaml
 
 sed -i "s/server_url: http:\/\/127.0.0.1:8080/server_url: http:\/\/${server_url}/g" /app/headscale/config.yaml
 ```
 
-```
+```shell
 docker compose up -d
 docker ps
 
@@ -72,7 +72,7 @@ docker exec headscale headscale apikeys create
 ```
 
 # tailscale
-```
+```shell
 chmod o+r /usr/share/keyrings/tailscale-archive-keyring.gpg
 curl -fsSL https://tailscale.com/install.sh | sh
 
